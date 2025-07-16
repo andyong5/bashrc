@@ -1,0 +1,73 @@
+export PATH=“/usr/local/opt/openssl@1.1/bin:$PATH”
+export PATH="$HOME/.rbenv/shims:$PATH"
+alias python=/usr/bin/python3
+alias brew='env PATH="${PATH//$(pyenv root)\/shims:/}" brew'
+export PATH="$PATH:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
+source "$(brew --prefix)/opt/zsh-git-prompt/zshrc.sh"
+PROMPT='%F{#84d933}%n%F{#6891d0}%~%F{white}%b$(git_super_status) %# '
+eval "$(rbenv init - zsh)"
+eval "$(pyenv init -)"
+eval "$(direnv hook zsh)"
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+export PATH="$HOME/.rbenv/bin:$PATH"
+
+# for ls different color folders
+alias ls='ls -G'
+export CLICOLOR=1
+export LSCOLORS=gxFxCxDxBxegedabagaced
+alias start="foreman start -f Procfile.development"
+alias um="git checkout master && git pull && bin/setup"
+alias rbm="um && git checkout - && git rebase origin/master"
+alias rbc="git rebase --continue"
+alias rc="git reset --soft HEAD^"
+alias rmf="git checkout master --"
+alias gql="yarn graphql-schema"
+alias gc="git commit -m"
+alias gcb="git checkout -b"
+alias ga="git add ."
+alias gp="git push"
+alias spec="bundle exec rspec --color"
+alias be="bundle exec"
+alias reset_enter="stty sane"
+autoload -U add-zsh-hook
+load-nvmrc() {
+  local node_version="$(nvm version)"
+  local nvmrc_path="$(nvm_find_nvmrc)"
+
+  if [ -n "$nvmrc_path" ]; then
+    local nvmrc_node_version=$(nvm version "$(cat "${nvmrc_path}")")
+
+    if [ "$nvmrc_node_version" = "N/A" ]; then
+      nvm install
+    elif [ "$nvmrc_node_version" != "$node_version" ]; then
+      nvm use
+    fi
+  elif [ "$node_version" != "$(nvm version default)" ]; then
+    echo "Reverting to nvm default version"
+    nvm use default
+  fi
+}
+function kill_port() {
+  lsof -i tcp:$1 -t | xargs kill -9
+}
+add-zsh-hook chpwd load-nvmrc
+load-nvmrc
+
+
+hash -d monolith=~/mt/platform
+parse_git_branch() {
+    git branch 2> /dev/null | sed -n -e 's/^\* \(.*\)/[\1]/p'
+}
+COLOR_DEF='%f'
+COLOR_USR='%F{243}'
+COLOR_DIR='%F{197}'
+COLOR_GIT='%F{39}'
+# About the prefixed `$`: https://tldp.org/LDP/Bash-Beginners-Guide/html/sect_03_03.html#:~:text=Words%20in%20the%20form%20%22%24',by%20the%20ANSI%2DC%20standard.
+NEWLINE=$'\n'
+# Set zsh option for prompt substitution
+setopt PROMPT_SUBST
+export PROMPT='${COLOR_DIR}%d${COLOR_GIT}$(parse_git_branch)${COLOR_DEF} %% '
+source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
